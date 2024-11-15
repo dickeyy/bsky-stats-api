@@ -74,3 +74,15 @@ func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
 		Float64("growth_rate", data.UsersGrowthRatePerSecond).
 		Msg("Request completed")
 }
+
+func (s *Server) handlePing(w http.ResponseWriter, r *http.Request) {
+	logger := log.With().
+		Str("method", r.Method).
+		Str("path", r.URL.Path).
+		Str("remote_addr", r.RemoteAddr).
+		Logger()
+
+	logger.Info().Msg("Ping request received")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("pong"))
+}

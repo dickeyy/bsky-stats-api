@@ -27,6 +27,7 @@ func NewServer(cfg *config.Config) *Server {
 func (s *Server) Start() error {
 	// Register handlers
 	http.HandleFunc("/", s.handleStats)
+	http.HandleFunc("/ping", s.handlePing)
 
 	addr := fmt.Sprintf(":%s", s.cfg.Port)
 	log.Info().
