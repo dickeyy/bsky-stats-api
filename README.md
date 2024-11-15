@@ -1,19 +1,20 @@
-# bsky stats api
+# bsky stats API
 
-An API written in Go (1.23) to get various statistics about Bluesky. Powered by [jaz.bsky.social](https://bsky.app/profile/jaz.bsky.social)'s [bsky stats](https://bsky.jazco.dev/stats).
+An API written in Go (1.23) to get various statistics about Bluesky, powered by [jaz.bsky.social](https://bsky.app/profile/jaz.bsky.social)'s [bsky stats](https://bsky.jazco.dev/stats).
 
 Derived from [espeon/bcounter-backend](https://github.com/espeon/bcounter-backend).
 
 Ths API esentially just wraps the parent API, adds some growth rate calculations, and caches the results for continuous fetching.
 
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/dickeyy)
+![Uptime Robot status](https://img.shields.io/uptimerobot/status/m798029245-89fa0c4d65d3f1d0c99dacb6)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/dickeyy/bsky-stats-api)
 
 ## Usage
 
 This API is free to use, but it is also extremely easy to self-host. If you can, please self-host this API as it will save on resources for my server.
 
-**Endpoint:** `GET https://bsky-stats.kyle.so`
+**Endpoint:** `GET https://bsky-stats.scroll.blue`
 Returns:
 
 ```json
@@ -28,7 +29,7 @@ Returns:
 }
 ```
 
-The API will attempt to serve cahced data if it is available. Cached data is invalidated every 60 seconds, so hitting the API over and over will not return new data unless the update time has passed.
+The API will attempt to serve cached data if it is available. Cached data is invalidated every 60 seconds, so hitting the API over and over will not return new data unless the update time has passed.
 
 ### Self-hosting
 
