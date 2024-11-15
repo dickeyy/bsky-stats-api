@@ -16,7 +16,7 @@ type Cache struct {
 }
 
 type CacheEntry struct {
-	Data      models.ParentResponse
+	Data      models.CachedResponse
 	ExpiresAt time.Time
 }
 
@@ -26,7 +26,7 @@ func NewCache(expiration time.Duration) *Cache {
 	}
 }
 
-func (c *Cache) Get() (*models.ParentResponse, bool) {
+func (c *Cache) Get() (*models.CachedResponse, bool) {
 	c.RLock()
 	defer c.RUnlock()
 
@@ -51,22 +51,31 @@ func (c *Cache) Get() (*models.ParentResponse, bool) {
 	return &c.data.Data, true
 }
 
-func (c *Cache) Set(data models.ParentResponse) {
+func (c *Cache) GetPrevious() *models.CachedResponse {
+	c.RLock()
+	defer c.RUnlock()
+
+	if c.data == nil {
+		return nil
+	}
+	return &c.data.Data
+}
+
+func (c *Cache) Set(data models.CachedResponse) {
 	c.Lock()
 	defer c.Unlock()
 
-	expiresAt := time.Now().Add(c.expiration)
 	c.data = &CacheEntry{
 		Data:      data,
-		ExpiresAt: expiresAt,
+		ExpiresAt: data.NextUpdateTime,
 	}
 
 	log.Info().
-		Time("expires_at", expiresAt).
+		Time("next_update", data.NextUpdateTime).
 		Int("total_users", data.TotalUsers).
 		Int("total_posts", data.TotalPosts).
 		Int("total_follows", data.TotalFollows).
 		Int("total_likes", data.TotalLikes).
-		Time("updated_at", data.UpdatedAt).
+		Float64("growth_rate", data.UsersGrowthRatePerSecond).
 		Msg("Cache updated")
 }

@@ -25,7 +25,38 @@ func NewClient(baseURL string) *Client {
 	}
 }
 
-func (c *Client) FetchStats() (*models.ParentResponse, error) {
+func (c *Client) ProcessStats(prevCache *models.CachedResponse) (*models.CachedResponse, error) {
+	parentResp, err := c.fetchFromParentAPI()
+	if err != nil {
+		return nil, err
+	}
+
+	// Calculate growth rate
+	var usersGrowthRatePerSecond float64 = 2.34 * 60 * 0.95 // Default rate if no previous cache
+
+	if prevCache != nil {
+		timeSinceLast := parentResp.UpdatedAt.Sub(prevCache.LastUpdateTime).Seconds()
+		if timeSinceLast > 0 {
+			usersChangeSinceLast := float64(parentResp.TotalUsers - prevCache.TotalUsers)
+			usersGrowthRatePerSecond = (usersChangeSinceLast / timeSinceLast) * 0.95
+		}
+	}
+
+	// Create enhanced response
+	response := &models.CachedResponse{
+		TotalUsers:               parentResp.TotalUsers,
+		TotalPosts:               parentResp.TotalPosts,
+		TotalFollows:             parentResp.TotalFollows,
+		TotalLikes:               parentResp.TotalLikes,
+		UsersGrowthRatePerSecond: usersGrowthRatePerSecond,
+		LastUpdateTime:           parentResp.UpdatedAt,
+		NextUpdateTime:           time.Now().Add(time.Minute),
+	}
+
+	return response, nil
+}
+
+func (c *Client) fetchFromParentAPI() (*models.ParentResponse, error) {
 	log.Debug().Msg("Fetching from parent API")
 
 	start := time.Now()
