@@ -6,6 +6,9 @@ Derived from [espeon/bcounter-backend](https://github.com/espeon/bcounter-backen
 
 Ths API esentially just wraps the parent API, adds some growth rate calculations, and caches the results for continuous fetching.
 
+![GitHub Sponsors](https://img.shields.io/github/sponsors/dickeyy)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/dickeyy/bsky-stats-api)
+
 ## Usage
 
 This API is free to use, but it is also extremely easy to self-host. If you can, please self-host this API as it will save on resources for my server.
