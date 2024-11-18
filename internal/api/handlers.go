@@ -1,49 +1,23 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
-	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
 
-func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleStats(c *gin.Context) {
 	logger := log.With().
-		Str("method", r.Method).
-		Str("path", r.URL.Path).
+		Str("method", c.Request.Method).
+		Str("path", c.Request.URL.Path).
 		Logger()
-
-	// Set CORS headers
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-
-	// Handle OPTIONS request
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
-	// Only allow GET requests
-	if r.Method != http.MethodGet {
-		logger.Warn().Msg("Method not allowed")
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	start := time.Now()
 
 	// Try to get data from cache
 	if data, ok := s.cache.Get(); ok {
 		// Cache hit
-		w.Header().Set("X-Cache", "HIT")
-		json.NewEncoder(w).Encode(data)
-
-		logger.Info().
-			Str("cache", "HIT").
-			Dur("duration", time.Since(start)).
-			Msg("Request completed")
+		c.Header("X-Cache", "HIT")
+		c.JSON(http.StatusOK, data)
 		return
 	}
 
@@ -56,7 +30,7 @@ func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
 		logger.Error().
 			Err(err).
 			Msg("Failed to fetch data")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -64,23 +38,10 @@ func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
 	s.cache.Set(*data)
 
 	// Return response
-	w.Header().Set("X-Cache", "MISS")
-	json.NewEncoder(w).Encode(data)
-
-	logger.Info().
-		Str("cache", "MISS").
-		Dur("duration", time.Since(start)).
-		Float64("growth_rate", data.UsersGrowthRatePerSecond).
-		Msg("Request completed")
+	c.Header("X-Cache", "MISS")
+	c.JSON(http.StatusOK, data)
 }
 
-func (s *Server) handlePing(w http.ResponseWriter, r *http.Request) {
-	logger := log.With().
-		Str("method", r.Method).
-		Str("path", r.URL.Path).
-		Logger()
-
-	logger.Info().Msg("Ping request received")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("pong"))
+func (s *Server) handlePing(c *gin.Context) {
+	c.String(http.StatusOK, "pong")
 }
