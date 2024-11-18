@@ -47,6 +47,7 @@ func NewServer(cfg *config.Config) *Server {
 func (s *Server) registerRoutes() {
 	s.router.GET("/", s.handleStats)
 	s.router.GET("/ping", s.handlePing)
+	s.router.HEAD("/ping", s.handlePing)
 }
 
 func (s *Server) Start() error {
